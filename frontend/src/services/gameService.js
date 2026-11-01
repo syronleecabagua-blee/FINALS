@@ -10,7 +10,7 @@ async function request(url, options) {
     return response.json();
 }
 
-export function getNewWord(difficulty = "easy", topic = "tech",) {
+export function getNewWord(difficulty = "easy", topic = "tech") {
     return request(
         `${API_URL}/game/new?difficulty=${difficulty}&topic=${topic}`
     );
@@ -24,16 +24,16 @@ export function checkAnswer(word, answer) {
     });
 }
 
-export function saveScore(playerName, score, difficulty) {
+export function saveScore(playerName, score, difficulty, topic = "tech") {
     return request(`${API_URL}/game/score`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerName, score, difficulty })
+        body: JSON.stringify({ playerName, score, difficulty, topic })
     });
 }
 
-export function getLeaderboard(difficulty = "easy") {
+export function getLeaderboard(difficulty = "easy", topic = "tech") {
     return request(
-        `${API_URL}/game/leaderboard?difficulty=${difficulty}`
+        `${API_URL}/game/leaderboard?difficulty=${difficulty}&topic=${topic}`
     );
 }

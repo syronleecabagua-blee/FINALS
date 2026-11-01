@@ -1,41 +1,76 @@
 import { useEffect, useState } from "react";
 import { getLeaderboard } from "../services/gameService";
 
+const TOPICS = [
+    ["tech", "Tech"],
+    ["general", "General"],
+    ["science", "Science"]
+];
+
 const DIFFICULTIES = [
     ["easy", "Easy"],
     ["hard", "Hard"],
     ["superhard", "Super Hard"]
 ];
 
+const RANK_CLASSES = ["rank-gold", "rank-silver", "rank-bronze"];
+
 function Leaderboard() {
+    const [topic, setTopic] = useState("tech");
     const [difficulty, setDifficulty] = useState("easy");
     const [leaderboard, setLeaderboard] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
-    async function loadLeaderboard(selectedDifficulty = difficulty) {
-        try {
-            setLoading(true);
-            setError("");
-
-            const data = await getLeaderboard(selectedDifficulty);
-            if (data.success) setLeaderboard(data.leaderboard);
-        } catch (error) {
-            console.error(error);
-            setError("Unable to load leaderboard.");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    function changeDifficulty(value) {
-        setDifficulty(value);
-        loadLeaderboard(value);
-    }
+    const [refreshKey, setRefreshKey] = useState(0);
 
     useEffect(() => {
-        loadLeaderboard("easy");
-    }, []);
+        let cancelled = false;
+
+        async function run() {
+            try {
+                const data = await getLeaderboard(difficulty, topic);
+
+                if (!cancelled && data.success) {
+                    setLeaderboard(data.leaderboard);
+                    setError("");
+                }
+            } catch (err) {
+                console.error(err);
+
+                if (!cancelled) {
+                    setError("Unable to load leaderboard.");
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        run();
+
+        const handleScoreSaved = () => {
+            setLoading(true);
+            setRefreshKey((key) => key + 1);
+        };
+
+        window.addEventListener("leaderboard:score-saved", handleScoreSaved);
+
+        return () => {
+            cancelled = true;
+            window.removeEventListener("leaderboard:score-saved", handleScoreSaved);
+        };
+    }, [difficulty, topic, refreshKey]);
+
+    function changeDifficulty(value) {
+        setLoading(true);
+        setDifficulty(value);
+    }
+
+    function changeTopic(value) {
+        setLoading(true);
+        setTopic(value);
+    }
 
     return (
         <div className="leaderboard-card">
@@ -44,17 +79,22 @@ function Leaderboard() {
                     <span className="leaderboard-icon">#</span>
                     <h2>Leaderboard</h2>
                 </div>
-
-                <button
-                    className="refresh-button"
-                    onClick={() => loadLeaderboard()}
-                    type="button"
-                >
-                    ↻ Refresh
-                </button>
             </div>
 
-            <div className="leaderboard-tabs">
+            <div className="leaderboard-tabs topic-tabs">
+                {TOPICS.map(([value, label]) => (
+                    <button
+                        key={value}
+                        type="button"
+                        className={topic === value ? "active" : ""}
+                        onClick={() => changeTopic(value)}
+                    >
+                        {label}
+                    </button>
+                ))}
+            </div>
+
+            <div className="leaderboard-tabs difficulty-tabs">
                 {DIFFICULTIES.map(([value, label]) => (
                     <button
                         key={value}
@@ -71,9 +111,7 @@ function Leaderboard() {
             ) : error ? (
                 <div className="leaderboard-message error">{error}</div>
             ) : leaderboard.length === 0 ? (
-                <div className="leaderboard-message">
-                    No scores yet for {difficulty}!
-                </div>
+                <div className="leaderboard-message">No scores yet for {difficulty}!</div>
             ) : (
                 <div className="leaderboard-list">
                     {leaderboard.map((player, index) => (
@@ -81,23 +119,12 @@ function Leaderboard() {
                             className={`leaderboard-row ${index < 3 ? "top-player" : ""}`}
                             key={player.id}
                         >
-                            <div
-                                className={`rank ${
-                                    index === 0
-                                        ? "rank-gold"
-                                        : index === 1
-                                        ? "rank-silver"
-                                        : index === 2
-                                        ? "rank-bronze"
-                                        : "rank-normal"
-                                }`}
-                            >
+                            <div className={`rank ${RANK_CLASSES[index] ?? "rank-normal"}`}>
                                 #{index + 1}
                             </div>
 
                             <div className="player-info">
                                 <strong>{player.playerName}</strong>
-                                <span>{player.difficulty}</span>
                             </div>
 
                             <div className="player-score">

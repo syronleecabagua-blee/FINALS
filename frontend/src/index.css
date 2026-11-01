@@ -2,27 +2,31 @@
     box-sizing: border-box;
 }
 
+/* Shared arcade palette used by the game, leaderboard, and glass surfaces. */
 :root {
-    --vh-violet-600: #7020c9;
-    --vh-violet-300: #b98cf0;
-    --vh-pink: #f067ab;
-    --vh-lavender-soft: #f4ecff;
-    --vh-lavender-white: #fcffff;
+    color-scheme: dark;
+    --vh-bg: #0c1117;
+    --vh-card: #151d26;
+    --vh-surface: #1d2934;
+    --vh-surface-hover: #273744;
+    --vh-inset: #101820;
 
-    --vh-surface-1: #fdfaff;
-    --vh-surface-2: #f7efff;
-    --vh-surface-3: #efe2ff;
+    --vh-orange: #ff704f;
+    --vh-orange-light: #ff9a7f;
+    --vh-orange-hover: #ff8468;
 
-    --vh-ink: #3b1560;
-    --vh-text: #4a2a70;
-    --vh-muted: #7a6699;
-    --vh-muted-2: #a394bd;
+    --vh-glacier: #c9f0e4;
+    --vh-highlight: rgba(255, 192, 102, 0.09);
 
-    --vh-border: #ece0fc;
+    --vh-text: #f2f4f5;
+    --vh-muted: #a8b4bd;
+    --vh-muted-2: #75838e;
 
-    --vh-danger: #e0447c;
+    --vh-border: #2b3945;
 
-    --vh-focus-ring: rgba(185, 140, 240, 0.25);
+    --vh-danger: #ff6a52;
+
+    --vh-focus-ring: rgba(255, 112, 79, 0.28);
 }
 
 html,
@@ -34,7 +38,27 @@ body,
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: var(--vh-surface-2);
+    min-height: 100vh;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background:
+        radial-gradient(ellipse at 12% 12%, rgba(36, 90, 89, 0.19), transparent 36rem),
+        radial-gradient(ellipse at 88% 82%, rgba(159, 69, 48, 0.12), transparent 34rem),
+        var(--vh-bg);
     color: var(--vh-text);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--vh-orange-light);
+    outline-offset: 3px;
+}
+
+::selection {
+    color: #101820;
+    background: #ffc066;
 }
